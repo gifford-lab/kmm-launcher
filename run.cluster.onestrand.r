@@ -214,7 +214,7 @@ checks.passed = 0
     rl=gsub('EMAIL',mailaddr,rl)
     rl=gsub('RUN_STR',runstr,rl)
     rl=gsub('TEST_CHR',testchr,rl)
-    rl=gsub('BUCKET_NAME',bucket.name,rl)
+    rl=gsub('BUCKET_NAME',bucket_name,rl)
 
     rsystem(paste0('printf \'',paste0(rl,collapse='\n'),'\' > ~/runall.sh'))
     rsystem('chmod +x ~/runall.sh')
