@@ -16,9 +16,10 @@ ADD standalone.template.txt /kmm/standalone.template.txt
 ADD user-data.txt /kmm/user-data.txt
 
 RUN chmod +x /kmm/run.onestrand.r
+RUN chmod +x /kmm/run.cluster.onestrand.r
 RUN chmod -R 777 /kmm
 
 
 #launch me with
 #docker build -t thashim/kmm-launcher .
-#docker run --rm -v /cluster:/cluster -i thashim/kmm-launcher /kmm/run.onestrand.r /cluster/thashim/docker/kmm-launcher/example/nrf.list /cluster/ec2/auth.txt
+#docker run --rm -v /cluster:/cluster -i thashim/kmm-launcher /kmm/run.onestrand.r /cluster/projects/wordfinder/paper/rlist/round_2/imr90.ndnase.list /cluster/ec2/auth.txt

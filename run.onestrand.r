@@ -60,9 +60,74 @@ smooth.window=1
 require('utils')
 cov.num = 0
 upb = 20
-mbsize = 40960000
+mbsize = 10240000
 
 #probably dont need changing..
 branch = 'no91'
 
-source('/kmm/run.cluster.onestrand.r')
+# hardcoded directories
+gbase = '/genome/'
+
+
+### load input
+input.lines=readLines(input.list)
+input.lines=input.lines[nchar(input.lines)>0]
+input.options=input.lines[grep('#',input.lines)]
+bam.prefix=''
+out.prefix=''
+postfix=''
+
+epointers = (1:length(input.lines))[-grep('#|//',input.lines)]
+ep2 = c(0,epointers)
+
+############
+# functions
+
+rsystem <- function(sh,intern=F,wait=T){
+    system(paste0('ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ',starcluster.rsa,' ubuntu@',INSTANCE_NAME,' ',shQuote(sh)),intern=intern,wait=wait)
+}
+
+scptoclus <- function(infile,out,intern=F){
+    system(paste0('scp -C -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -c arcfour -i ',starcluster.rsa,' ',shQuote(infile),' ubuntu@',INSTANCE_NAME,':',shQuote(out)))
+}
+
+scpstring <- function(infile,out,intern=F){
+    paste0('scp -C -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -c arcfour -i ',starcluster.rsa,' ',shQuote(infile),' ubuntu@',INSTANCE_NAME,':',shQuote(out))
+}
+
+scpfromclus <- function(infile,out,intern=F){
+    system(paste0('scp -C -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -c arcfour -i ',starcluster.rsa,' -r ubuntu@',INSTANCE_NAME,':',shQuote(infile),' ',shQuote(out)))
+}
+
+getFilename<-function(x){
+    rev(strsplit(x,'/')[[1]])[1]
+}
+
+############
+# script
+
+
+for( i in 1:length(epointers) ) {
+    t1=Sys.time()
+
+    if(epointers[i] > (ep2[i]+1)){
+        for(option in (ep2[i]+1):(epointers[i]-1)){
+            ss=strsplit(input.lines[option],'[# ]')[[1]]
+            ss=ss[nchar(ss)>0]
+            print(paste0('set:',ss[1],' to:',ss[2]))
+            assign(ss[1],ss[2])
+        }
+    }
+    #
+    input.bams = input.lines[epointers[i]]
+    rl = strsplit(input.bams,'[,]')[[1]]
+    exptname = rl[1]
+    bamlist = rl[-1]
+    save.image(paste0('state',i,'.RData'))
+}
+
+runlist=sapply(1:length(epointers),function(i){
+    paste0('/kmm/run.cluster.onestrand.r ',i)
+})
+writeLines(runlist,'/kmm/runlist.txt')
+system('cat /kmm/runlist.txt | parallel')
