@@ -61,8 +61,8 @@ for(bamfile in bamlist){
     clist = sapply(1:length(chr.name),function(chr){
         paste0("(samtools view -F 788 -q ",quality," ",shQuote(paste0(bam.prefix,bamfile))," chr",chr.name[chr]," | cut -f 4 >> \'",tmpdir,exptname,"/allreads-",chr,".csv\'; touch ",tmpdir,exptname,"/chr",chr,".done)")
     })
-    writeLines(clist,paste0(tmpdir,'commlist.txt'))
-    system(paste0('cat ',tmpdir,'commlist.txt | parallel --progress -j 4'))
+    writeLines(clist,paste0(tmpdir,'commlist',args[1],'.txt'))
+    system(paste0('cat ',tmpdir,'commlist',args[1],'.txt | parallel --progress -j 4'))
 }
 
 chrin = testchr
@@ -123,8 +123,8 @@ read.options=paste0(
 clist=sapply(1:(length(chr.name)),function(chr){
     scpstring(paste0(tmpdir,exptname,'/allreads-',chr,'.csv'),'/mnt/input/')
 })
-writeLines(clist,paste0(tmpdir,'commlist.txt'))
-system(paste0('cat ',tmpdir,'commlist.txt | parallel --progress -j 4'))
+writeLines(clist,paste0(tmpdir,'commlist',args[1],'.txt'))
+system(paste0('cat ',tmpdir,'commlist',args[1],'.txt | parallel --progress -j 4'))
 
 scptoclus(offset.file,'/mnt/input/offsets.txt')
 
