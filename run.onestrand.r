@@ -12,6 +12,8 @@ cred.file = args[2]
 price = 3.0
 realm = 'us-east-1'
 region = paste0(realm,'d')
+ami='ami-35dbde5c'
+itype='c3.8xlarge'
 
 print('parse credential file')
 cf=readLines(cred.file)

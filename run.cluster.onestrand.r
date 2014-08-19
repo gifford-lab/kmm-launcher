@@ -28,8 +28,7 @@ test.bases = chroffs[testchr + 1] - heldout.start
 
 ##launch instance
 userdatablob=paste0(system('cat /kmm/user-data.txt | base64',intern=T),collapse='')
-ami='ami-35dbde5c'
-lspec = paste0("\'{\"UserData\":\"",userdatablob,"\",\"ImageId\":\"",ami,"\",\"KeyName\":\"",keyname,"\",\"InstanceType\":\"c3.8xlarge\"}\'")
+lspec = paste0("\'{\"UserData\":\"",userdatablob,"\",\"ImageId\":\"",ami,"\",\"KeyName\":\"",keyname,"\",\"InstanceType\":\"",itype,"\"}\'")
 launch=system(paste0('aws --region ',realm,' --output text ec2 request-spot-instances --spot-price ',price,' --launch-specification ',lspec),intern=T)
 
 sirname = strsplit(launch,'\t')[[1]][4]
