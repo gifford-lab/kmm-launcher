@@ -7,7 +7,7 @@ A set of ec2 support scripts for the kmer-model which takes a bam and automatica
 Run the command in the git repo root:
 
 ```
-docker pull
+docker pull thashim/kmm-launcher
 docker run --rm -w `pwd` -v /cluster:/cluster -i thashim/kmm-launcher /kmm/run.onestrand.r  example/nrf.list /cluster/ec2/auth.txt
 ```
 
@@ -32,6 +32,11 @@ Useful options:
 `region` sets the job submit regions, you can check the spot prices of a `c3.8xlarge` and pick a cheap region
 
 `mailaddr` sets the email address that gets emailed at the end of a job. The emails will probably get spam-boxed first, so check spam folder.
+
+Optional options:
+`itype` sets the instance type: valid alternatives are cc2.8xlarge, to use this you must also change the AMI.
+
+`ami` sets the AMI type: you will want to use the HVM image (`ami-864d84ee`) if you use any other instances like cc2.8xlarge or r3.8xlarge.
 
 ### *.list 
 
