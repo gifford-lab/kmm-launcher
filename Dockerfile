@@ -21,5 +21,7 @@ RUN chmod -R 777 /kmm
 
 
 #launch me with
-#docker build -t thashim/kmm-launcher .
-#docker run --rm -v /cluster:/cluster -i thashim/kmm-launcher /kmm/run.onestrand.r /cluster/projects/wordfinder/paper/rlist/round_2/imr90.ndnase.list /cluster/ec2/auth.txt
+#docker build -t thashim/kmm-launcher2 .
+#docker run --rm -t -v /cluster:/cluster -i thashim/kmm-launcher /bin/bash
+#docker run --rm -w `pwd` -v /cluster:/cluster -i thashim/kmm-launcher2 /kmm/run.onestrand.r example/covbinom.list /cluster/ec2/auth.txt
+#args=c('/cluster/thashim/docker/kmm-launcher/example/covbinom.list','/cluster/ec2/auth.txt')

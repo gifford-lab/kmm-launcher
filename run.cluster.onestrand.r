@@ -77,6 +77,45 @@ con=file(paste0(tmpdir,exptname,'/heldout.in'),'wb')
 writeBin(rbequiv,con,4)
 close(con)
 
+## If we have covariates, proc them here.
+if(covariate!='none'){
+    covbamlist = strsplit(covariate,'[,]')[[1]]
+    tmpdir.cov = paste0('/tmp/kmer-',sirname,'-cov/')
+    unlink(tmpdir.cov,T,T)
+    dir.create(tmpdir.cov)
+    for(bamfile in covbamlist){
+        if(!file.exists(paste0(bam.prefix,bamfile,'.bai'))){
+            print("No bam index found, reindexing")
+            x=paste0(bam.prefix,bamfile)
+            y=paste0("samtools index ",shQuote(x))
+            print(y)
+            system(y,wait=T)
+        }
+    }
+    print('Extracing reads from bam file')
+    dir.create(paste0(tmpdir.cov,exptname),F)
+    unlink(paste0(tmpdir.cov,exptname,'/*'),T,T)
+    for(bamfile in covbamlist){
+        print(bamfile)
+        clist = sapply(1:length(chr.name),function(chr){
+            paste0("(samtools view -F 788 -q ",quality," ",shQuote(paste0(bam.prefix,bamfile))," chr",chr.name[chr]," | cut -f 4 >> \'",tmpdir.cov,exptname,"/allreads-",chr,".csv\'; touch ",tmpdir.cov,exptname,"/chr",chr,".done)")
+        })
+        writeLines(clist,paste0(tmpdir.cov,'commlist',cms[1],'.txt'))
+        system(paste0('cat ',tmpdir.cov,'commlist',cms[1],'.txt | parallel --progress -j 4'))
+    }
+    chrin = testchr
+    readsin=scan(paste0(tmpdir.cov,exptname,'/allreads-',chrin,'.csv'),list(0))
+    rrle=rle(sort(readsin[[1]]))
+    rcoord=rrle$value
+    rnum=rrle$length
+    rbequiv=rep(0,test.bases)
+    print(max(rcoord))
+    rbequiv[rcoord[rcoord<test.bases]]=rnum[rcoord<test.bases]
+    con=file(paste0(tmpdir.cov,exptname,'/heldout.covariates.in'),'wb')
+    writeBin(rbequiv,con,4)
+    close(con)
+}
+
 #####
 ## check if spot is up
 
@@ -110,40 +149,68 @@ INSTANCE_NAME = strsplit(istat,'\t')[[grep('INSTANCES',istat)]][16]
 
 while(length(grep('done',rsystem('ls /mnt',intern=T)))==0) { Sys.sleep(5) }
 
+
+####
+# Transfer files.
+
 scptoclus(genomedir,'/mnt/input/genome.in')
 
-read.options=paste0(
-    '--num_chr=',rev(chr.name)[1],' ',
-    '--num_bases=',rev(chroffs)[1],' ',
-    '--max_ct=100 ',
-    '--offsets_file=/mnt/input/offsets.txt ',
-    '--out_file=/mnt/input/reads.in')
+scptoclus(offset.file,'/mnt/input/offsets.txt')
 
 clist=sapply(1:(length(chr.name)),function(chr){
     scpstring(paste0(tmpdir,exptname,'/allreads-',chr,'.csv'),'/mnt/input/')
 })
 writeLines(clist,paste0(tmpdir,'commlist',cms[1],'.txt'))
 system(paste0('cat ',tmpdir,'commlist',cms[1],'.txt | parallel --progress -j 4'))
-
-scptoclus(offset.file,'/mnt/input/offsets.txt')
-
 scptoclus(paste0(tmpdir,exptname,'/heldout.in'),'/mnt/input/heldout.in')
+## If we have covariates, transfer covar files here:
+if(covariate!='none'){
+    clist=sapply(1:(length(chr.name)),function(chr){
+        scpstring(paste0(tmpdir.cov,exptname,'/allreads-',chr,'.csv'),'/mnt/covar/')
+    })
+    writeLines(clist,paste0(tmpdir.cov,'commlist',cms[1],'.txt'))
+    system(paste0('cat ',tmpdir.cov,'commlist',cms[1],'.txt | parallel --progress -j 4'))
+    scptoclus(paste0(tmpdir.cov,exptname,'/heldout.covariates.in'),'/mnt/input/heldout.covariates.in')
+}
 
 while(length(grep('setup',rsystem('ls /home/ubuntu/',intern=T)))==0) {
     Sys.sleep(5)
 }
 
 unlink(tmpdir,T,T)
+if(covariate!='none')
+    unlink(tmpdir.cov,T,T)
 
 ### run
-rsystem('git clone https://thashim-ro:*SybT2X9@bitbucket.org/thashim/delete_later.git /home/ubuntu/delete_later')
+scptoclus(rsa_key,'~/.ssh/id_rsa')
+rsystem('echo -e "Host github.mit.edu\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config')
+rsystem('git clone git@github.mit.edu:thashim/ccm-devel.git /home/ubuntu/delete_later')
 rsystem('mkdir /home/ubuntu/delete_later/build')
 rsystem('rm -rf ~/delete_later/build/*')
 rsystem(paste0('cd ~/delete_later/; git pull; git checkout ',branch))
-cmakestr = paste0('-DK=',k,' -DRESOL=',resol,' -DKBIG=',maxk,' -DMINIBATCH=',mbsize)
+
+if(covariate!='none'){
+    ncov = 1
+}else{
+    ncov = 0
+    kbeta = 0
+}
+cmakestr = paste0('-DK=',k,' -DRESOL=',resol,' -DKBIG=',maxk,' -DLINK=',link,' -DNUM_COV=',ncov,' -DK_BETA=',kbeta)
 rsystem(paste0('cd ~/delete_later/build/; cmake .. ; make clean; make -j CXX_DEFINES=\"',cmakestr,'\"'))
 ##make reads
-readstr=paste0('cd ~/delete_later/build/; ./reads ',read.options,' --reads_dir=/mnt/input/')
+read.options=paste0(
+    '--num_chr=',rev(chr.name)[1],' ',
+    '--num_bases=',rev(chroffs)[1],' ',
+    '--max_ct=100 ',
+    '--offsets_file=/mnt/input/offsets.txt ')
+
+readstr=paste0('cd ~/delete_later/build/; ./reads ',read.options,' --out_file=/mnt/input/reads.in --reads_dir=/mnt/input/')
+
+if(covariate!='none'){
+    covstr=paste0('cd ~/delete_later/build/; ./reads ',read.options,' --out_file=/mnt/input/covariates.in --reads_dir=/mnt/covar/')
+}else{
+    covstr=''
+}
 
 scptoclus(input.list,'~/input.list')
 rsystem(paste0('printf \'',paste0('i=',i,'\n'),'\' > ~/params.txt'));
@@ -152,11 +219,19 @@ rsystem(paste0('printf \'',paste0('i=',i,'\n'),'\' > ~/params.txt'));
 rsystem('mkdir ~/.aws')
 rsystem(paste0('printf \"[default]\naws_access_key_id=',access.key,'\naws_secret_access_key=',secret.key,'\" > ~/.aws/config'))
 
-runstr=paste0('~/delete_later/build/mpi_motif --out_dir=/mnt/output --genome=/mnt/input/genome.in --reads=/mnt/input/reads.in --num_bases=',train.bases,' --read_max=',read.max,' --smooth_window_size=',smooth.window,' --heldout_start=',heldout.start,' --heldout_size=',test.bases,' --heldout_reads=/mnt/input/heldout.in 2>&1 | tee /home/ubuntu/runlog.txt')
+
+if(covariate!='none'){
+    coption='--covariates=/mnt/input/covariates.in --heldout_covariates=/mnt/input/heldout.covariates.in'
+}else{
+    coption=''
+}
+
+runstr=paste0('~/delete_later/build/mpi_motif --out_dir=/mnt/output --genome=/mnt/input/genome.in --reads=/mnt/input/reads.in --num_bases=',train.bases,' --read_max=',read.max,' --smooth_window_size=',smooth.window,' --heldout_start=',heldout.start,' --heldout_size=',test.bases,' --heldout_reads=/mnt/input/heldout.in ',coption,' 2>&1 | tee /home/ubuntu/runlog.txt')
 
 rl=readLines('/kmm/standalone.template.txt')
 rname=paste0(exptname,postfix)
 rl=gsub('READ_STR',readstr,rl)
+rl=gsub('COV_STR',covstr,rl)
 rl=gsub('RUN_NAME',rname,rl)
 rl=gsub('REGION',realm,rl)
 rl=gsub('SIRNAME',sirname,rl)

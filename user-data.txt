@@ -2,6 +2,7 @@
 export DEBIAN_FRONTEND=noninteractive
 mkdir /mnt/output
 mkdir /mnt/input
+mkdir /mnt/covar
 touch /mnt/done
 sudo chmod -R 777 /mnt
 sudo apt-get update

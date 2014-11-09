@@ -40,7 +40,6 @@ key.name = key_name
 access.key = access_key
 secret.key = secret_key
 bucket.name = bucket_name
-#'cgs-kmer-model'
 
 system('mkdir /.aws')
 system(paste0('printf \"[default]\naws_access_key_id=',access_key,'\naws_secret_access_key=',secret_key,'\" > /.aws/config'))
@@ -61,13 +60,9 @@ read.max=50
 smooth.window=1
 require('utils')
 cov.num = 0
-upb = 20
-mbsize = 10240000
 
 #probably dont need changing..
-branch = 'no91'
-
-# hardcoded directories
+branch = 'master'
 gbase = '/genome/'
 
 

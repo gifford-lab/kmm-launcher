@@ -7,11 +7,9 @@
 #k 1000
 #resol 4
 #read.max 5
-#smooth.window 20
 #genome mm10
-
-nrf_wt,nrf_round1/sherwood nodox Nrf1 test 1.bwa.mm10.bam,nrf_round1/sherwood plusdox Nrf1 test 1.bwa.mm10.bam,nrf_round1/sherwood sr3 Nrf1 test 1.bwa.mm10.bam,nrf_round1/sherwood sr8 Nrf1 test 1.bwa.mm10.bam
+#branch batch
 
 #smooth.window 10
 #quality 20
-dnase_1,mes_dnase/D0_175-400_130801.bwa.mm10.bam,mes_dnase/D0_50-100_130801.bwa.mm10.bam
+dnase_2,mes_dnase/D0_175-400_130801.bwa.mm10.bam,mes_dnase/D0_50-100_130801.bwa.mm10.bam
