@@ -7,8 +7,8 @@ A set of ec2 support scripts for the kmer-model which takes a bam and automatica
 Run the command in the git repo root:
 
 ```
-docker pull thashim/kmm-launcher
-docker run --rm -w `pwd` -v /cluster:/cluster -i thashim/kmm-launcher /kmm/run.onestrand.r  example/nrf.list /cluster/ec2/auth.txt
+docker pull thashim/kmm-launcher2
+docker run --rm -w `pwd` -v /cluster:/cluster -i thashim/kmm-launcher2 /kmm/run.onestrand.r example/covbinom.list /cluster/ec2/auth.txt
 ```
 
 ##Configuring the KMM
@@ -26,7 +26,7 @@ bucket_name:kmer_rc2
 mailaddr:thashim@csail.mit.edu
 ```
 
-Useful options: 
+Useful options:
 `price` sets the max bid price, $3 is reasonable. Set too low and your jobs will get killed before completed
 
 `region` sets the job submit regions, you can check the spot prices of a `c3.8xlarge` and pick a cheap region
@@ -38,7 +38,7 @@ Optional options:
 
 `ami` sets the AMI type: you will want to use the HVM image (`ami-864d84ee`) if you use any other instances like cc2.8xlarge or r3.8xlarge.
 
-### *.list 
+### *.list
 
 Example is available in git, some more are avaialable at /cluster/projects/wordfinder/paper/rlist
 
@@ -83,7 +83,7 @@ Later variable assignment lines starting with `#` will override earlier ones. In
 
 #### Common arguments
 
-`bam_prefix`: the path to where bam files are stored. Launcher will look for `bam_prefix+bam_name` where `bam_name` is the name in the `experiment_name`. 
+`bam_prefix`: the path to where bam files are stored. Launcher will look for `bam_prefix+bam_name` where `bam_name` is the name in the `experiment_name`.
 
 `gbase`: path to where genome files are stored. do not change if run within gifford lab.
 
@@ -91,7 +91,7 @@ Later variable assignment lines starting with `#` will override earlier ones. In
 
 `postfix`: postfix applied to jobs. Each job will go into a S3 bucket where they are separated into folders named `experiment_name+postfix`
 
-`bucket_name`: s3 bucket name. This should generally be your username / project name to avoid mixing multiple people's jobs. 
+`bucket_name`: s3 bucket name. This should generally be your username / project name to avoid mixing multiple people's jobs.
 
 `genome`: set to the organism genome. Currently only hg19 and mm10 are supported.
 
@@ -108,5 +108,6 @@ Later variable assignment lines starting with `#` will override earlier ones. In
 
 `smooth.window`: smooth the input by this many bases before feeding into the model. Useful for low-coverage experiments. Default of 10-20 is fine for all but extreme high or low coverage experiments.
 
-`mbsize`: optimizer minibatch size, smaller is faster but less stable. Generally set to around 40960000 - 10240000. Most likely best not to touch this.
+`covariate`: list of experiments to use to predict the target experiment (ie DNase-seq predicting a ChIP).
 
+`kbeta`: window sie for the prediction of target (ie ChIP) from covariate (ie DNase).
