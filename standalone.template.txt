@@ -15,7 +15,7 @@ find /mnt/summaries/* | xargs -L 1 -I {} aws s3 cp {} s3://BUCKET_NAME/RUN_NAME/
 find /mnt/output/*.bin | xargs -L 1 -I {} aws s3 cp {} s3://BUCKET_NAME/RUN_NAME/output/ --region REGION
 lzop -1 /mnt/input/*
 find /mnt/input/*.lzo | xargs -L 1 -I {} aws s3 cp {} s3://BUCKET_NAME/RUN_NAME/input/ --region REGION
-aws ses send-email --from thashim@csail.mit.edu --to EMAIL --text  "$(head -n 50 ~/runlog.txt)" --subject RUN_NAME_complete --region REGION
+aws ses send-email --from thashim@csail.mit.edu --to EMAIL --text  "$(head -c 10M ~/nohup.txt)" --subject RUN_NAME_complete --region REGION
 aws s3 cp ~/nohup.txt s3://BUCKET_NAME/RUN_NAME/ --region REGION
 aws ec2 cancel-spot-instance-requests --spot-instance-request-ids SIRNAME --region REGION
 aws ec2 terminate-instances --instance-ids INAME --region REGION

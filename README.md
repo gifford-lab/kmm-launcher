@@ -1,6 +1,8 @@
 
 A set of ec2 support scripts for the kmer-model which takes a bam and automatically generates fitted output to be placed into amazon's S3 storage system
 
+*Make sure your specified bucket name exists in s3 before starting!*
+
 
 ##Example
 

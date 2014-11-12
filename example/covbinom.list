@@ -1,8 +1,8 @@
 #bam.prefix /cluster/projects/wordfinder/bams/
 #gbase /cluster/projects/wordfinder/data/genome/
 #quality 0
-#postfix .cov_test
-#bucket_name ccm_test
+#postfix .cov-test
+#bucket_name ccm-test
 #maxk 8
 #k 1000
 #resol 4

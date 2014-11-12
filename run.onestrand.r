@@ -41,8 +41,8 @@ access.key = access_key
 secret.key = secret_key
 bucket.name = bucket_name
 
-system('mkdir /.aws')
-system(paste0('printf \"[default]\naws_access_key_id=',access_key,'\naws_secret_access_key=',secret_key,'\" > /.aws/config'))
+system('mkdir ~/.aws')
+system(paste0('printf \"[default]\naws_access_key_id=',access_key,'\naws_secret_access_key=',secret_key,'\" > ~/.aws/config'))
 
 ############
 # default parameters (can be overwirtten in .list files
