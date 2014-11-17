@@ -122,8 +122,11 @@ if(covariate!='none'){
 print('wait for spot fulfilment')
 while(sistatus!='fulfilled'){
     cat('.')
-    sitest=system(paste0('aws --region ',realm,' --output text ec2 describe-spot-instance-requests --spot-instance-request-ids ',sirname),intern=T)
-    sistatus=strsplit(sitest,'\t')[[grep('STATUS',sitest)]][2]
+    tryCatch({
+        sitest=system(paste0('aws --region ',realm,' --output text ec2 describe-spot-instance-requests --spot-instance-request-ids ',sirname),intern=T)
+        sistatus=strsplit(sitest,'\t')[[grep('STATUS',sitest)]][2]
+    })
+    Sys.sleep(5)
 }
 iname = strsplit(sitest,'\t')[[1]][3]
 
@@ -137,10 +140,13 @@ checks.passed = 0
 print('wait for status checks')
 while(checks.passed < 2){
     cat('.')
-    itest=system(paste0('aws --region ',realm,' --output text ec2 describe-instance-status --instance-ids ',iname),intern=T)
-    if(length(itest)>=3){
-        checks.passed = length(grep('passed',itest))
-    }
+    tryCatch({
+        itest=system(paste0('aws --region ',realm,' --output text ec2 describe-instance-status --instance-ids ',iname),intern=T)
+        if(length(itest)>=3){
+            checks.passed = length(grep('passed',itest))
+        }
+    })
+    Sys.sleep(5)
 }
 
 istat=system(paste0('aws --region ',realm,' --output text ec2 describe-instances --instance-ids ',iname),intern=T)
