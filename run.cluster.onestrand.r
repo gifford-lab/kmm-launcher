@@ -86,6 +86,9 @@ while(sistatus!='fulfilled'){
     tryCatch({
         sitest=system(paste0('aws --region ',realm,' --output text ec2 describe-spot-instance-requests --spot-instance-request-ids ',sirname),intern=T)
         sistatus=strsplit(sitest,'\t')[[grep('STATUS',sitest)]][2]
+    }, error = function(e){
+        print(e)
+        Sys.sleep(10)
     })
     Sys.sleep(5)
 }
@@ -106,6 +109,9 @@ while(checks.passed < 2){
         if(length(itest)>=3){
             checks.passed = length(grep('passed',itest))
         }
+    }, error = function(e){
+        print(e)
+        Sys.sleep(10)
     })
     Sys.sleep(5)
 }
