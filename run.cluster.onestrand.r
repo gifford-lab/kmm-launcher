@@ -233,9 +233,9 @@ rsystem(paste0('printf \"[default]\naws_access_key_id=',access.key,'\naws_secret
 
 
 if(covariate!='none'){
-    coption='--covariates=/mnt/input/covariates.in --heldout_covariates=/mnt/input/heldout.covariates.in'
+    coption=paste0('--covariates=/mnt/input/covariates.in --heldout_covariates=/mnt/input/heldout.covariates.in --cov_max=',cov.max)
 }else{
-    coption=''
+    coption='--cov_max=1'
 }
 
 runstr=paste0('~/delete_later/build/mpi_motif --out_dir=/mnt/output --genome=/mnt/input/genome.in --reads=/mnt/input/reads.in --num_bases=',train.bases,' --read_max=',read.max,' --smooth_window_size=',smooth.window,' --heldout_start=',heldout.start,' --heldout_size=',test.bases,' --heldout_reads=/mnt/input/heldout.in ',coption,' 2>&1 | tee /home/ubuntu/runlog.txt')
