@@ -54,6 +54,9 @@ genome='hg19'
 maxk=8
 k=200
 resol=1
+cov.max = 1
+covariate='none'
+link='POISSON'
 
 #runtime params (used)
 read.max=50
