@@ -42,6 +42,8 @@ Optional options:
 
 Example is available in git, some more are avaialable at /cluster/projects/wordfinder/paper/rlist
 
+The only valid delimiter for a *.list file is 'space' not tab or comma or anything else. This also means you cannot use directories or parameters that have spaces in them.
+
 Example:
 ```
 #bam.prefix /cluster/projects/wordfinder/bams/
