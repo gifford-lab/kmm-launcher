@@ -9,7 +9,7 @@ cred.file = args[2]
 
 
 #ec2 default settings
-price = 3.0
+price = '3.0'
 realm = 'us-east-1'
 region = paste0(realm,'d')
 ami='ami-d05e75b8'

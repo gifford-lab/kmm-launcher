@@ -29,10 +29,17 @@ test.bases = chroffs[testchr + 1] - heldout.start
 ##launch instance
 userdatablob=paste0(system('cat /kmm/user-data.txt | base64',intern=T),collapse='')
 lspec = paste0("\'{\"UserData\":\"",userdatablob,"\",\"ImageId\":\"",ami,"\",\"KeyName\":\"",keyname,"\",\"InstanceType\":\"",itype,"\"}\'")
-launch=system(paste0('aws --region ',realm,' --output text ec2 request-spot-instances --spot-price ',price,' --launch-specification ',lspec),intern=T)
 
-sirname = strsplit(launch,'\t')[[1]][4]
-sistatus = ''
+awscomm="aws"
+if(price != "Inf"){
+    launch=system(paste0(awscomm,' --region ',realm,' --output text ec2 request-spot-instances --spot-price ',price,' --launch-specification ',lspec),intern=T)
+    sirname = strsplit(launch,'\t')[[1]][4]
+    sistatus = ''
+}else{
+    launch=system(paste0(awscomm,' --region ',realm,' --output text ec2 run-instances --image-id ',ami,' --key-name ',keyname,' --instance-type ',itype,' --user-data file:///kmm/user-data.txt'),intern=T)
+    iname=strsplit(launch,'\t')[[3]][8]
+    sirname=iname
+}
 
 #########
 ## process bam while we wait..
@@ -119,11 +126,12 @@ if(covariate!='none'){
 #####
 ## check if spot is up
 
+if(price!="Inf"){
 print('wait for spot fulfilment')
 while(sistatus!='fulfilled'){
     cat('.')
     tryCatch({
-        sitest=system(paste0('aws --region ',realm,' --output text ec2 describe-spot-instance-requests --spot-instance-request-ids ',sirname),intern=T)
+        sitest=system(paste0(awscomm,' --region ',realm,' --output text ec2 describe-spot-instance-requests --spot-instance-request-ids ',sirname),intern=T)
         sistatus=strsplit(sitest,'\t')[[grep('STATUS',sitest)]][2]
     }, error = function(e){
         print(e)
@@ -132,9 +140,10 @@ while(sistatus!='fulfilled'){
     Sys.sleep(5)
 }
 iname = strsplit(sitest,'\t')[[1]][3]
+}
 
 rname=paste0(exptname,postfix)
-system(paste0('aws --region ',realm,' --output text ec2 create-tags --resources ',iname,' --tags Key=Name,Value=',rname))
+system(paste0(awscomm,' --region ',realm,' --output text ec2 create-tags --resources ',iname,' --tags Key=Name,Value=',rname))
 
 istatus = 'initializing'
 
@@ -144,7 +153,7 @@ print('wait for status checks')
 while(checks.passed < 2){
     cat('.')
     tryCatch({
-        itest=system(paste0('aws --region ',realm,' --output text ec2 describe-instance-status --instance-ids ',iname),intern=T)
+        itest=system(paste0(awscomm,' --region ',realm,' --output text ec2 describe-instance-status --instance-ids ',iname),intern=T)
         if(length(itest)>=3){
             checks.passed = length(grep('passed',itest))
         }
@@ -155,9 +164,10 @@ while(checks.passed < 2){
     Sys.sleep(5)
 }
 
-istat=system(paste0('aws --region ',realm,' --output text ec2 describe-instances --instance-ids ',iname),intern=T)
+istat=system(paste0(awscomm,' --region ',realm,' --output text ec2 describe-instances --instance-ids ',iname),intern=T)
 
-INSTANCE_NAME = strsplit(istat,'\t')[[grep('INSTANCES',istat)]][16]
+isub=strsplit(istat,'\t')[[grep('INSTANCES',istat)]]
+INSTANCE_NAME = isub[grep('amazonaws',isub)]
 
 while(length(grep('done',rsystem('ls /mnt',intern=T)))==0) { Sys.sleep(5) }
 

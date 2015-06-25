@@ -29,7 +29,7 @@ mailaddr:thashim@csail.mit.edu
 ```
 
 Useful options:
-`price` sets the max bid price, $3 is reasonable. Set too low and your jobs will get killed before completed
+`price` sets the max bid price. Setting this value to Inf will use on-demand allocation (cannot be killed) but will cost a fixed price of ~$.16 / hr. Use this setting only if there's heavy contention, and you cannot wait. $3 is reasonable. Set too low and your jobs will get killed before completed
 
 `region` sets the job submit regions, you can check the spot prices of a `c3.8xlarge` and pick a cheap region
 
