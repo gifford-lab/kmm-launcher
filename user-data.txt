@@ -7,7 +7,7 @@ touch /mnt/done
 sudo chmod -R 777 /mnt
 sudo apt-get update
 sudo apt-get upgrade -y
-sudo apt-get -q -y install git git-core g++ build-essential libboost-all-dev cmake r-base python-pip lzop
+sudo apt-get -q -y --force-yes install git git-core g++ build-essential libboost-all-dev cmake r-base python-pip lzop
 sudo pip install awscli
 mkdir ~/.aws
 touch /home/ubuntu/setup.done
