@@ -1,5 +1,5 @@
 
-A set of ec2 support scripts for the kmer-model which takes a bam and automatically generates fitted output to be placed into amazon's S3 storage system
+A set of ec2 support scripts for the kmer-model (SCM) which takes a bam and automatically generates fitted output to be placed into amazon's S3 storage system
 
 
 ##Example
@@ -11,7 +11,7 @@ docker pull thashim/kmm-launcher
 docker run --rm -w `pwd` -v /cluster:/cluster -i thashim/kmm-launcher /kmm/run.onestrand.r  example/nrf.list /cluster/ec2/auth.txt
 ```
 
-##Configuring the KMM
+##Configuring the SCM
 
 ### auth.txt
 ```
@@ -79,7 +79,7 @@ experiment_name,bam_1.bam,bam_2.bam [..]
 experiment_name_2,bam_1 [...]
 ```
 
-The launcher parses from top to bottom, setting each variable_name to value. Whenever it encounters a line without a `#` character, it will launch a KMM-job, assuming that the first entry is the experiment name and any following it are bams.
+The launcher parses from top to bottom, setting each variable_name to value. Whenever it encounters a line without a `#` character, it will launch a SCM-job, assuming that the first entry is the experiment name and any following it are bams.
 
 Later variable assignment lines starting with `#` will override earlier ones. In the example above, `nrf_wt` launches with a `quality` parameter of 0, but `dnase_1` is launched with `quality` of 20 due to the later override line.
 
